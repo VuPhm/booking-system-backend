@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/booking_management
+    username: sa
+    password:
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update # Tự động tạo bảng dựa trên Entity Java
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: trueß
