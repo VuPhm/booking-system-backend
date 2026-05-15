@@ -11,3 +11,8 @@ spring:
     properties:
       hibernate:
         format_sql: trueß
+app:
+  jwt:
+    # Chuỗi secret tối thiểu 32 ký tự (đã mã hóa Base64 càng tốt)
+    secret: dWFmLWJvb2tpbmctc3lzdGVtLXNlY3JldC1rZXktMjAyNi1zZW5pb3ItY29udXNsdGFudA==
+    expiration-ms: 86400000 # 24 giờ

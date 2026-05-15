@@ -1,10 +1,9 @@
 package edu.uaf.booking.entity;
 
 import edu.uaf.booking.enums.Role;
-import lombok.Data;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import jakarta.persistence.*;
 import lombok.Setter;
 
 import java.time.ZonedDateTime;
