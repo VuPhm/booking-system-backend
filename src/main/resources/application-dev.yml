@@ -1,7 +1,7 @@
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/booking_management
-    username: sa
+    username: vup
     password:
     driver-class-name: org.postgresql.Driver
   jpa:
