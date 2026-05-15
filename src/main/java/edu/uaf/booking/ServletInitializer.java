@@ -1,4 +1,4 @@
-package edu.uaf.booking_system_backend;
+package edu.uaf.booking;
 
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
