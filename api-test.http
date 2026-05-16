@@ -1,0 +1,120 @@
+### =========================================================================
+### PHẦN 1: XÁC THỰC HỆ THỐNG (AUTH FLOW)
+### =========================================================================
+
+### 1. Đăng ký tài khoản Quản trị viên Cửa hàng (PROVIDER_ADMIN)
+# Lưu ý: Đảm bảo bảng 'providers' dưới DB đã có ít nhất 1 bản ghi id = 1 trước khi chạy
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "manager@edu.uaf",
+  "password": "SecurePassword123",
+  "fullName": "Chủ Cửa Hàng Spa",
+  "phone": "0987654321",
+  "role": "PROVIDER_ADMIN",
+  "providerId": 1
+}
+
+###
+
+### 2. Đăng nhập để lấy Token và cấu hình Ngữ cảnh Tenant
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "manager@edu.uaf",
+  "password": "SecurePassword123"
+}
+
+> {%
+    // Trích xuất Token gán vào biến toàn cục cho các request sau
+    client.global.set("provider_token", response.body.accessToken);
+%}
+
+### =========================================================================
+### PHẦN 2: KIỂM THỬ QUẢN LÝ DỊCH VỤ (VALIDATION & BUSINESS)
+### =========================================================================
+
+### 3. Thêm dịch vụ HỢP LỆ (Kỳ vọng: 201 Created)
+POST http://localhost:8080/api/provider/services
+Authorization: Bearer {{provider_token}}
+Content-Type: application/json
+
+{
+  "name": "Massage Toàn Thân Thảo Dược",
+  "description": "Liệu trình thư giãn 60 phút với tinh dầu thiên nhiên",
+  "price": 350000.00,
+  "durationMinutes": 60
+}
+
+###
+
+### 4. Thêm dịch vụ SAI DỮ LIỆU (Kỳ vọng: 400 Bad Request từ GlobalExceptionHandler)
+# Test lỗi: Tên trống, Giá âm, Thời gian < 1 phút
+POST http://localhost:8080/api/provider/services
+Authorization: Bearer {{provider_token}}
+Content-Type: application/json
+
+{
+  "name": "",
+  "description": "Test rác",
+  "price": -5000,
+  "durationMinutes": 0
+}
+
+###
+
+### 5. Lấy danh sách dịch vụ của riêng cửa hàng này (Kỳ vọng: 200 OK)
+GET http://localhost:8080/api/provider/services
+Authorization: Bearer {{provider_token}}
+
+### =========================================================================
+### PHẦN 3: KIỂM THỬ KHUNG GIỜ (SLOT OVERLAPPING CHECK)
+### =========================================================================
+
+### 6. Mở Khung giờ Ca 1 HỢP LỆ (Kỳ vọng: 201 Created)
+# Thời gian: 08:00:00 -> 09:00:00
+POST http://localhost:8080/api/provider/slots
+Authorization: Bearer {{provider_token}}
+Content-Type: application/json
+
+{
+  "date": "2026-06-01",
+  "startTime": "08:00:00",
+  "endTime": "09:00:00"
+}
+
+###
+
+### 7. Mở Khung giờ Ca 2 HỢP LỆ liền kề (Kỳ vọng: 201 Created)
+# Thời gian: 09:00:00 -> 10:00:00 (Điểm kết thúc trùng điểm bắt đầu là hợp lệ)
+POST http://localhost:8080/api/provider/slots
+Authorization: Bearer {{provider_token}}
+Content-Type: application/json
+
+{
+  "date": "2026-06-01",
+  "startTime": "09:00:00",
+  "endTime": "10:00:00"
+}
+
+###
+
+### 8. Mở Khung giờ BỊ CHỒNG CHÉO (Kỳ vọng: 400 Bad Request từ existOverlappingSlot)
+# Thời gian cố tình đè: 08:30:00 -> 09:30:00 (Giao cắt với cả Ca 1 và Ca 2)
+POST http://localhost:8080/api/provider/slots
+Authorization: Bearer {{provider_token}}
+Content-Type: application/json
+
+{
+  "date": "2026-06-01",
+  "startTime": "08:30:00",
+  "endTime": "09:30:00"
+}
+
+###
+
+### 9. Tra cứu lịch làm việc trong ngày (Kỳ vọng: 200 OK - Chỉ chứa 2 ca hợp lệ)
+GET http://localhost:8080/api/provider/slots?date=2026-06-01
+Authorization: Bearer {{provider_token}}

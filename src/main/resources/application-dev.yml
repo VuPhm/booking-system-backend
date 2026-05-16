@@ -1,0 +1,18 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/booking_management
+    username: vup
+    password:
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update # Tự động tạo bảng dựa trên Entity Java
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: trueß
+app:
+  jwt:
+    # Chuỗi secret tối thiểu 32 ký tự (đã mã hóa Base64 càng tốt)
+    secret: dWFmLWJvb2tpbmctc3lzdGVtLXNlY3JldC1rZXktMjAyNi1zZW5pb3ItY29udXNsdGFudA==
+    expiration-ms: 86400000 # 24 giờ

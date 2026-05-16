@@ -1,4 +1,4 @@
-package edu.uaf.booking_system_backend;
+package edu.uaf.booking;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
