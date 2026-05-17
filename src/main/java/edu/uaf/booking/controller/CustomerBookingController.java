@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/customer/bookings")
@@ -25,5 +26,10 @@ public class CustomerBookingController {
     public ResponseEntity<BookingResponse> placeBooking(Principal principal, @Valid @RequestBody BookingRequest request) {
         BookingResponse response = bookingService.createBooking(principal.getName(), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<BookingResponse>> getCustomerBookings(Principal principal) {
+        return ResponseEntity.ok(bookingService.getBookingsByCustomer(principal.getName()));
     }
 }
