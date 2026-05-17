@@ -1,11 +1,15 @@
 package edu.uaf.booking.service;
 
-import edu.uaf.booking.dto.BookingDto.*;
+import edu.uaf.booking.dto.BookingDto.BookingRequest;
+import edu.uaf.booking.dto.BookingDto.BookingResponse;
 import edu.uaf.booking.entity.*;
 import edu.uaf.booking.enums.BookingStatus;
 import edu.uaf.booking.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 
@@ -62,7 +66,7 @@ public class BookingService {
         Booking savedBooking = bookingRepository.save(booking);
 
         String timeWindow = slot.getStartTime().toString() + " - " + slot.getEndTime().toString();
-        
+
         return new BookingResponse(
                 savedBooking.getId(),
                 service.getName(),
@@ -145,5 +149,49 @@ public class BookingService {
                         b.getStatus().name(),
                         b.getTotalPrice()
                 )).toList();
+    }
+
+    @Transactional
+    public BookingResponse cancelBooking(String customerEmail, Long bookingId) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy bản ghi đặt lịch"));
+
+        // Chốt chặn 1: Xác thực quyền sở hữu khách hàng
+        if (!booking.getCustomer().getEmail().equals(customerEmail)) {
+            throw new org.springframework.security.access.AccessDeniedException("Bạn không có quyền thao tác trên hóa đơn này");
+        }
+
+        // Chốt chặn 2: Kiểm tra điều kiện trạng thái ban đầu (Phải là PENDING)
+        if (booking.getStatus() != BookingStatus.PENDING) {
+            throw new IllegalArgumentException("Không thể hủy lịch trình đã được xử lý hoặc đã hủy trước đó");
+        }
+
+        // Chốt chặn 3: Ràng buộc cửa sổ thời gian (Tối thiểu 2 tiếng trước giờ hẹn)
+        Slot slot = booking.getSlot();
+        LocalDateTime slotDateTime = LocalDateTime.of(slot.getDate(), slot.getStartTime());
+        // Đồng bộ về múi giờ hệ thống (Khuyên dùng Asia/Ho_Chi_Minh cho môi trường Việt Nam)
+        ZonedDateTime slotTargetTime = slotDateTime.atZone(ZoneId.systemDefault());
+        ZonedDateTime currentTime = ZonedDateTime.now();
+
+        if (currentTime.plusHours(2).isAfter(slotTargetTime)) {
+            throw new IllegalArgumentException("Vi phạm quy định vận hành: Chỉ được phép hủy lịch hẹn trước giờ bắt đầu tối thiểu 2 tiếng");
+        }
+
+        // Đủ điều kiện -> Tiến hành cập nhật
+        booking.setStatus(BookingStatus.CANCELLED);
+
+        slot.setAvailable(true); // Nhả ca trống
+        slotRepository.save(slot);
+
+        Booking updatedBooking = bookingRepository.save(booking);
+
+        return new BookingResponse(
+                updatedBooking.getId(),
+                updatedBooking.getService().getName(),
+                updatedBooking.getSlot().getDate().toString(),
+                updatedBooking.getSlot().getStartTime().toString() + " - " + updatedBooking.getSlot().getEndTime().toString(),
+                updatedBooking.getStatus().name(),
+                updatedBooking.getTotalPrice()
+        );
     }
 }

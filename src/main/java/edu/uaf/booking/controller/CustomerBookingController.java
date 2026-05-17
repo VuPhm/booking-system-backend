@@ -32,4 +32,9 @@ public class CustomerBookingController {
     public ResponseEntity<List<BookingResponse>> getCustomerBookings(Principal principal) {
         return ResponseEntity.ok(bookingService.getBookingsByCustomer(principal.getName()));
     }
+
+    @PatchMapping("/{bookingId}/cancel")
+    public ResponseEntity<BookingResponse> cancelBooking(Principal principal, @PathVariable Long bookingId) {
+        return ResponseEntity.ok(bookingService.cancelBooking(principal.getName(), bookingId));
+    }
 }

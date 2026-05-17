@@ -1,0 +1,29 @@
+### 1. Đăng nhập lấy Quyền Khách hàng
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "customer@edu.uaf",
+  "password": "SecurePassword123"
+}
+
+> {% client.global.set("customer_jwt_token", response.body.accessToken); %}
+
+###
+
+### TEST CASE 1: Hủy lịch Đạt chuẩn (Kỳ vọng: 200 OK + status: "CANCELLED")
+PATCH http://localhost:8080/api/customer/bookings/91/cancel
+Authorization: Bearer {{customer_jwt_token}}
+
+###
+
+### TEST CASE 2: Hủy lịch sát giờ hẹn (Kỳ vọng: 400 Bad Request)
+# Với mốc thời gian hiện tại là 16:50 ngày 17/05/2026, đơn đặt lúc 17:00 (cách 10 phút) chắc chắn sẽ bị hệ thống chặn lại.
+PATCH http://localhost:8080/api/customer/bookings/92/cancel
+Authorization: Bearer {{customer_jwt_token}}
+
+###
+
+### TEST CASE 3: Hủy lịch sai trạng thái (Kỳ vọng: 400 Bad Request)
+PATCH http://localhost:8080/api/customer/bookings/93/cancel
+Authorization: Bearer {{customer_jwt_token}}
