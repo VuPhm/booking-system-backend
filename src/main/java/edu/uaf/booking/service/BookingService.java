@@ -130,4 +130,20 @@ public class BookingService {
                 updatedBooking.getTotalPrice()
         );
     }
+
+    @Transactional(readOnly = true)
+    public List<BookingResponse> getBookingsByCustomer(String customerEmail) {
+        User customer = userRepository.findByEmail(customerEmail)
+                .orElseThrow(() -> new IllegalArgumentException("Tài khoản khách hàng không tồn tại"));
+
+        return bookingRepository.findByCustomerId(customer.getId()).stream()
+                .map(b -> new BookingResponse(
+                        b.getId(),
+                        b.getService().getName(),
+                        b.getSlot().getDate().toString(),
+                        b.getSlot().getStartTime().toString() + " - " + b.getSlot().getEndTime().toString(),
+                        b.getStatus().name(),
+                        b.getTotalPrice()
+                )).toList();
+    }
 }
