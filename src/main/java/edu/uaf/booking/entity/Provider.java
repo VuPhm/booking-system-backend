@@ -23,6 +23,10 @@ public class Provider {
     @Column(name = "id")
     private Long id;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", unique = true)
+    private User user;
+
     @Column(name = "name", nullable = false, length = 150)
     private String name;
 

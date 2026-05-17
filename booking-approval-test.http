@@ -1,0 +1,16 @@
+### 1. Đăng nhập với tài khoản MANAGER thực tế
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "manager@edu.uaf",
+  "password": "SecurePassword123"
+}
+
+> {% client.global.set("provider_jwt_token", response.body.accessToken); %}
+
+###
+
+### 2. Truy vấn danh sách lịch đặt (Kỳ vọng: 200 OK)
+GET http://localhost:8080/api/provider/bookings
+Authorization: Bearer {{provider_jwt_token}}

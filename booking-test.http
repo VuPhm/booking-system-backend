@@ -1,0 +1,30 @@
+### =========================================================================
+### LUỒNG KIỂM THỬ TỰ ĐỘNG (CUSTOMER BOOKING ENGINE)
+### =========================================================================
+
+# Bước 1: Đăng nhập lấy mã định danh hệ thống
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "customer@edu.uaf",
+  "password": "SecurePassword123"
+}
+
+> {%
+    // Bộ xử lý tự động của IDE: Trích xuất accessToken và ghim vào biến toàn cục
+    client.global.set("customer_jwt_token", response.body.accessToken);
+%}
+
+###
+
+# Bước 2: Gọi API Đặt lịch sử dụng biến toàn cục (Đảm bảo có dấu hai chấm ':')
+POST http://localhost:8080/api/customer/bookings
+Authorization: Bearer {{customer_jwt_token}}
+Content-Type: application/json
+
+{
+  "serviceId": 1,
+  "slotId": 1,
+  "customerNote": "Kiểm thử luồng tích hợp tự động"
+}
