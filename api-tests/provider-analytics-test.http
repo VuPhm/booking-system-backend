@@ -1,0 +1,16 @@
+### 1. Đăng nhập quyền PROVIDER_ADMIN (manager)
+POST http://{{host}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{manager_email}}",
+  "password": "{{password}}"
+}
+
+> {% client.global.set("provider_jwt_token", response.body.accessToken); %}
+
+###
+
+### 2. Lấy chỉ số tổng hợp Dashboard (Kỳ vọng: 200 OK + Phân rã đủ 6 trường số liệu)
+GET http://{{host}}/api/provider/bookings/dashboard/stats
+Authorization: Bearer {{provider_jwt_token}}

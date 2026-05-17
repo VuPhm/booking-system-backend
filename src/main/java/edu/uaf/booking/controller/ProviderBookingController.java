@@ -1,10 +1,12 @@
 package edu.uaf.booking.controller;
 
 import edu.uaf.booking.dto.BookingDto.BookingResponse;
+import edu.uaf.booking.dto.BookingDto.ProviderDashboardStats;
 import edu.uaf.booking.service.BookingService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
 import java.security.Principal;
 import java.util.List;
 
@@ -31,4 +33,10 @@ public class ProviderBookingController {
             @RequestParam String status) {
         return ResponseEntity.ok(bookingService.updateBookingStatus(principal.getName(), bookingId, status));
     }
+    // Bổ sung Endpoint thống kê số liệu Dashboard
+    @GetMapping("/dashboard/stats")
+    public ResponseEntity<ProviderDashboardStats> getDashboardStats(Principal principal) {
+        return ResponseEntity.ok(bookingService.getProviderDashboardStats(principal.getName()));
+    }
+
 }

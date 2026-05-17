@@ -18,4 +18,14 @@ public final class BookingDto {
         String status,
         BigDecimal totalPrice
     ) {}
+
+    // Bổ sung DTO phục vụ Task 5.1
+    public record ProviderDashboardStats(
+            long totalBookings,
+            double totalRevenue,
+            long pendingCount,
+            long confirmedCount,
+            long rejectedCount,
+            long cancelledCount
+    ) {}
 }

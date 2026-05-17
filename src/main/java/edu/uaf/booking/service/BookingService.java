@@ -13,6 +13,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 
+import edu.uaf.booking.dto.BookingDto.ProviderDashboardStats;
 @Service
 public class BookingService {
 
@@ -192,6 +193,42 @@ public class BookingService {
                 updatedBooking.getSlot().getStartTime().toString() + " - " + updatedBooking.getSlot().getEndTime().toString(),
                 updatedBooking.getStatus().name(),
                 updatedBooking.getTotalPrice()
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public ProviderDashboardStats getProviderDashboardStats(String providerEmail) {
+        User user = userRepository.findByEmail(providerEmail)
+                .orElseThrow(() -> new IllegalArgumentException("Tài khoản đối tác không tồn tại"));
+
+        Provider provider = providerRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Tài khoản này chưa được cấu hình hồ sơ Đối tác"));
+
+        // Tải toàn bộ danh sách đơn hàng của Đối tác
+        List<Booking> bookings = bookingRepository.findByProviderId(provider.getId());
+
+        // Tính toán doanh thu thực tế (Chỉ cộng các đơn hàng có trạng thái CONFIRMED)
+        double totalRevenue = bookings.stream()
+                .filter(b -> b.getStatus() == BookingStatus.CONFIRMED)
+                .map(Booking::getTotalPrice)              // BƯỚC 1: Lấy ra luồng các đối tượng BigDecimal
+                .filter(java.util.Objects::nonNull)       // BƯỚC 2: Phòng thủ lọc bỏ phần tử null rác nếu có
+                .mapToDouble(java.math.BigDecimal::doubleValue) // BƯỚC 3: Trích xuất giá trị double nguyên thủy
+                .sum();                                   // BƯỚC 4: Cộng tổng toàn tuyến
+
+        // Đếm số lượng theo từng trạng thái bằng Stream API
+        long totalBookings = bookings.size();
+        long pendingCount = bookings.stream().filter(b -> b.getStatus() == BookingStatus.PENDING).count();
+        long confirmedCount = bookings.stream().filter(b -> b.getStatus() == BookingStatus.CONFIRMED).count();
+        long rejectedCount = bookings.stream().filter(b -> b.getStatus() == BookingStatus.REJECTED).count();
+        long cancelledCount = bookings.stream().filter(b -> b.getStatus() == BookingStatus.CANCELLED).count();
+
+        return new ProviderDashboardStats(
+                totalBookings,
+                totalRevenue,
+                pendingCount,
+                confirmedCount,
+                rejectedCount,
+                cancelledCount
         );
     }
 }
