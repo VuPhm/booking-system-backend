@@ -1,5 +1,6 @@
 package edu.uaf.booking.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -24,13 +25,16 @@ public final class ProviderBusinessDto {
     ) {}
 
     public record SlotCreateRequest(
-        @NotNull(message = "Ngày cấu hình không được để trống")
-        LocalDate date,
+            @NotNull
+            @JsonFormat(pattern = "yyyy-MM-dd")
+            LocalDate date,
 
-        @NotNull(message = "Giờ bắt đầu không được để trống")
-        LocalTime startTime,
+            @NotNull
+            @JsonFormat(pattern = "HH:mm:ss")
+            LocalTime startTime,
 
-        @NotNull(message = "Giờ kết thúc không được để trống")
-        LocalTime endTime
+            @NotNull
+            @JsonFormat(pattern = "HH:mm:ss")
+            LocalTime endTime
     ) {}
 }

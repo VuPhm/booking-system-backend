@@ -44,6 +44,9 @@ public class Booking {
     @Column(name = "status", nullable = false, length = 30)
     private BookingStatus status;
 
+    @Column(name = "customer_note", columnDefinition = "TEXT")
+    private String customerNote; // Bổ sung
+
     @Column(name = "created_at", insertable = false, updatable = false)
-    private ZonedDateTime createdAt;
+        private ZonedDateTime createdAt;
 }
